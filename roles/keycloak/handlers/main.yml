@@ -1,0 +1,28 @@
+---
+
+- name: Reload sysctl
+  ansible.builtin.service:
+    name: systemd-sysctl.service
+    state: restarted
+
+- name: Reload systemd
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: Rebuild Keycloak
+  become: true
+  become_user: keycloak
+  ansible.builtin.command: >-
+    /opt/keycloak/{{ keycloak_dir }}/bin/kc.sh build
+  args:
+    chdir: "/opt/keycloak/{{ keycloak_dir }}"
+  changed_when: true
+  when:
+    - keycloak_handler_build
+    - "keycloak_version is ansible.builtin.version('19.0.0', '<')"
+
+- name: Restart Keycloak
+  ansible.builtin.service:
+    name: keycloak
+    enabled: true
+    state: restarted

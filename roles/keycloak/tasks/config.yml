@@ -1,0 +1,57 @@
+---
+
+- name: Render Keycloak configuration
+  ansible.builtin.template:
+    src: "opt/keycloak/keycloak-{{ keycloak_major_version }}/conf/{{ item }}.j2"
+    dest: "{{ keycloak_dir }}/conf/{{ item }}"
+    owner: keycloak
+    group: keycloak
+    mode: "0600"
+  loop:
+    - cache-ispn.xml
+    - keycloak.conf
+    - quarkus.properties
+  notify:
+    - Rebuild Keycloak
+    - Restart Keycloak
+
+- name: Create log directory
+  ansible.builtin.file:
+    path: "{{ keycloak_log_file | dirname }}"
+    state: directory
+    # enforce that this is a directory and not a symlink
+    follow: false
+    owner: root
+    group: keycloak
+    mode: "0775"
+
+- name: Set sysctl values
+  ansible.builtin.template:
+    src: etc/sysctl.d/10-keycloak.conf.j2
+    dest: /etc/sysctl.d/10-keycloak.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - Reload sysctl
+  when:
+    - "keycloak_stack == 'udp'"
+
+- name: Flush handlers
+  ansible.builtin.meta: flush_handlers
+
+- name: Start and enable Keycloak
+  ansible.builtin.service:
+    name: keycloak
+    state: started
+    enabled: true
+
+- name: Wait for initialization
+  ansible.builtin.uri:
+    url: "{{ keycloak_liveness }}"
+    remote_src: "true"
+  register: _result
+  when: "not ansible_check_mode"
+  until: "_result.status not in [ -1, 503 ]"
+  retries: 720
+  delay: 5

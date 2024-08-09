@@ -1,0 +1,32 @@
+---
+
+# Template for keycloak.conf
+reverseproxy_template: keycloak.conf.j2
+
+# Public visible name of the Keycloak node
+reverseproxy_hostname: localhost.localdomain
+
+# Backend, needs to be host IP for clustered instances
+reverseproxy_backend: http://127.0.0.1:8080
+
+# Needs to be set to /auth for setups upgraded from JBoss to Quarkus
+reverseproxy_prefix: ""
+
+# Pointer to preinstalled SSL certificates
+reverseproxy_cert_file: "{{ reverseproxy_snakeoil_cert }}"
+reverseproxy_key_file: "{{ reverseproxy_snakeoil_key }}"
+
+# Configure firewalld
+reverseproxy_firewalld: true
+
+# Configure SElinux
+reverseproxy_selinux: true
+
+# Webroot where static files should be deployed to.  Set to none to disable.
+reverseproxy_webroot: /var/www/html
+reverseproxy_webroot_files: []
+
+reverseproxy_health_endpoint: "{{ reverseproxy_backend }}{{ reverseproxy_prefix }}/health"
+
+# Additional config to put at the end of the Keycloak https vhost section
+reverseproxy_additional_config: ""

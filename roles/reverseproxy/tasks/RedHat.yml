@@ -1,0 +1,84 @@
+---
+- name: Install required packages
+  ansible.builtin.dnf:
+    name:
+      - httpd
+      - mod_ssl
+      - policycoreutils-python-utils
+    state: present
+  notify: Restart Apache2
+  register: apache
+
+- name: Generate self-signed SSL certificates
+  ansible.builtin.service:
+    name: httpd-init.service
+    state: started
+  when: apache.changed  # noqa no-handler
+  notify: Restart Apache2
+
+- name: Open ports 80 and 443 in firewalld
+  ansible.posix.firewalld:
+    service: "{{ item }}"
+    immediate: true
+    permanent: true
+    state: enabled
+  loop:
+    - http
+    - https
+  when: reverseproxy_firewalld
+
+- name: Permit SELinux network access for httpd in
+  ansible.posix.seboolean:
+    name: httpd_can_network_connect
+    state: true
+    persistent: true
+  when: reverseproxy_selinux
+
+- name: Override default Apache2 configuration
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "/{{ item }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop:
+    - etc/httpd/conf/httpd.conf
+    - etc/httpd/conf.d/welcome.conf
+    - etc/httpd/conf.d/ssl.conf
+  notify: Restart Apache2
+
+- name: Add webroot files
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ reverseproxy_webroot }}/{{ item }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop: "{{ reverseproxy_webroot_files }}"
+  when: "reverseproxy_webroot is not none"
+
+- name: Render Keycloak site config
+  ansible.builtin.template:
+    src: "etc/httpd/conf.d/{{ reverseproxy_template }}"
+    dest: /etc/httpd/conf.d/keycloak.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart Apache2
+
+- name: Deploy liveness and readiness probes
+  ansible.builtin.template:
+    src: "var/www/cgi-bin/{{ item }}.j2"
+    dest: "/var/www/cgi-bin/{{ item }}"
+    owner: root
+    group: root
+    mode: "0755"
+  loop:
+    - liveness
+    - readiness
+
+- name: Start and enable Apache2
+  ansible.builtin.service:
+    name: "{{ reverseproxy_service_name }}"
+    state: started
+    enabled: true

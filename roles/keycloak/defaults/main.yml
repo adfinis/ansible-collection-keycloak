@@ -1,0 +1,189 @@
+---
+
+keycloak_version: "25.0.2"
+
+
+keycloak_major_version: "{{ (keycloak_version | split('.'))[0] | int }}"
+
+#
+# Keycloak installation directory
+keycloak_dir: /opt/keycloak/keycloak-{{ keycloak_version }}
+
+#
+# Database driver, postgres (recommended), dev-mem, dev-file, oracle, mariadb, mysql and mssql are possible
+keycloak_db: dev-file
+
+#
+# Database URI, login and password
+# keycloak_db_uri: jdbc:h2:${jboss.server.data.dir}/keycloak;AUTO_SERVER=TRUE
+keycloak_db_user: keycloak
+keycloak_db_pass: password
+
+#
+# Infinispan communication
+# local - no clustering, do not use infinispan
+# udp - multicast, enables autoconfiguration, requires closed subnet
+# tcp - tcp unicast clustering, but uses udp multicast for node discovery
+# tcp-static - pure unicast, allows multiple clusters in the same subnet or cross subnet clusters, or in networks without multicast support
+keycloak_stack: local
+
+#
+# Static list of members in a tcp based cluster
+keycloak_members:
+  hostname-a: 7800
+  hostname-b: 7800
+
+keycloak_jgroups_port: 7800
+
+#
+# JavaScript extension, deprecated but required for JavaScript mappers
+keycloak_scripts: false
+
+#
+# Custom extensions and hooks filled into standalone.xml
+keycloak_directories: []
+keycloak_extensions: []
+keycloak_spi: {}
+
+#
+# Cache theme, disable for development
+keycloak_theme_cache: true
+
+#
+# Cache user information - disable to avoid LDAP propagation delays
+keycloak_user_cache: true
+
+#
+# UNIX or DOS styled config file
+keycloak_newline_sequence: '\n'
+
+#
+# Configure firewall
+keycloak_firewalld: true
+
+#
+# Bind host and port
+keycloak_http_enabled: true
+keycloak_http_host: "127.0.0.1"
+keycloak_http_port: 8080
+keycloak_https_port: 8443
+
+#
+# Static prefix for all URLs. Set to /auth for backward compat with JBoss Keycloak
+keycloak_http_relative_path: /
+
+# Proxy mode:
+# - edge  for TLS-terminating proxy
+# - reencrypt  for reencrypting proxy
+# - passthrough  for TCP LBs
+# LEGACY, only used for Keycloak < 25
+keycloak_proxy: edge
+
+
+# Which set of headers Keycloak accepts from the reverse proxy:
+# - xforwarded: Accept the X-Forwarded-* headers
+# - forwarded: Accept the Forwarded header
+# Used in Keycloak >= 25
+keycloak_proxy_headers: xforwarded
+
+keycloak_hostname_strict_https: true
+
+keycloak_hostname_strict: true
+
+#
+# Proxy hostname and port
+keycloak_hostname: localhost
+
+#
+# Set keycloak_hostname_port (appended to host part of all generated URLs) if running on a nonstandard port
+# LEGACY, only used in Keycloak < 25.  Should be added to keycloak_hostname in KC >= 25
+# keycloak_hostname_port: 8443
+
+#
+# Backend for availability check and metrics
+keycloak_liveness: |-
+  http://{{- keycloak_http_host -}}
+  {%- if keycloak_major_version | int >= 25 -%}
+  :9000
+  {%- else -%}
+  {{- keycloak_http_port -}}
+  {%- endif -%}
+  {{- keycloak_http_relative_path -}}
+  {%- if keycloak_major_version | int >= 24 and 'multi-site' in keycloak_features -%}
+  /lb-health
+  {%- else -%}
+  /health
+  {%- endif -%}
+keycloak_metrics: |
+  http://{{- keycloak_http_host -}}
+  {%- if keycloak_major_version | int >= 25 -%}
+  :9000
+  {%- else -%}
+  {{- keycloak_http_port -}}
+  {%- endif -%}
+  {{- keycloak_http_relative_path -}}
+  /metrics
+
+#
+# Enable healthcheck and Prometheus metrics
+keycloak_health_enabled: true
+keycloak_metrics_enabled: false
+
+#
+# Backend, needs to be host IP for clustered instances
+keycloak_backend: http://localhost:8080
+
+#
+# Log destination
+keycloak_log_destinations: file
+
+#
+# Logfile destination
+keycloak_log_file: /var/log/keycloak/keycloak.log
+
+#
+# Log level, can override individual loggers with e.g.:
+#   INFO,org.infinispan.CLUSTER:WARN
+keycloak_log_level: INFO
+
+#
+# Configure log rotate
+keycloak_quarkus_logrotate_enabled: true
+keycloak_quarkus_logrotate_max_size: 10M
+keycloak_quarkus_logrotate_keep: 100
+
+# Number of days to keep rotate log files for.
+# Used in separate cronjob only (https://access.redhat.com/solutions/3682431)
+keycloak_log_retention_days: 90
+
+#
+# Enable some optional or preview features, see
+# https://www.keycloak.org/server/features for the full list.
+keycloak_features: []
+
+#
+# Disable some features enabled by default, see
+# https://www.keycloak.org/server/features for the full list.
+keycloak_features_disabled: []
+
+#
+# Admin user created during installation
+keycloak_admin_user: admin
+keycloak_admin_password: password
+
+#
+# JSON files to copy to the node and load into Keycloak's database
+keycloak_realm_config: []
+
+#
+# Create user and load confugration into database,
+# needs to be enabled on one node of a cluster
+keycloak_baseconf: false
+
+#
+# If true, run kc.sh start with --auto-build in the systemd unit
+keycloak_systemd_auto_build: true
+
+#
+# If true, run kc.sh build as a handler after config changes
+keycloak_handler_build: true

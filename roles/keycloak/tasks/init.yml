@@ -1,0 +1,44 @@
+---
+
+- name: Create initial admin user
+  block:
+
+    - name: Stop keycloak service
+      ansible.builtin.service:
+        name: keycloak.service
+        state: stopped
+
+    - name: Create initial admin user
+      become: true
+      become_user: keycloak
+      ansible.builtin.command: >-
+        timeout 5m bash -c '
+        /{{ keycloak_dir }}/bin/kc.sh start &
+        while ! curl {{ keycloak_liveness }}; do sleep 1; done; kill %1
+        '
+      args:
+        chdir: "{{ keycloak_dir }}"
+      environment:
+        # This is only applied if no user exists yet
+        KEYCLOAK_ADMIN: "{{ keycloak_admin_user }}"
+        KEYCLOAK_ADMIN_PASSWORD: "{{ keycloak_admin_password }}"
+      changed_when: true
+      timeout: 300
+
+  always:
+
+    - name: Start keycloak service
+      ansible.builtin.service:
+        name: keycloak.service
+        state: started
+        enabled: true
+
+    - name: Wait for initialization
+      ansible.builtin.uri:
+        url: "{{ keycloak_liveness }}"
+        remote_src: true
+      register: _result
+      when: "not ansible_check_mode"
+      until: "_result.status != -1"
+      retries: 720
+      delay: 5

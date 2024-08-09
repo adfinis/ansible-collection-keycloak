@@ -1,0 +1,89 @@
+---
+
+- name: Install Apache2
+  ansible.builtin.apt:
+    name:
+      - apache2
+      - ssl-cert
+  notify: Restart Apache2
+
+- name: Enable Apache modules
+  community.general.apache2_module:
+    name: "{{ item }}"
+  loop:
+    - rewrite
+    - ssl
+    - socache_shmcb
+    - headers
+    - proxy
+    - proxy_http
+    - proxy_http2
+    - cgid
+  notify: Restart Apache2
+
+- name: Enable Apache2 config files
+  ansible.builtin.file:
+    src: "../conf-available/{{ item }}"
+    dest: "/etc/apache2/conf-enabled/{{ item }}"
+    state: link
+  loop:
+    - serve-cgi-bin.conf
+  notify: Restart Apache2
+
+- name: Disable default site
+  ansible.builtin.file:
+    path: /etc/apache2/sites-enabled/000-default.conf
+    state: absent
+  notify: Restart Apache2
+
+- name: Create webroot directory
+  ansible.builtin.file:
+    path: "reverseproxy_webroot"
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: "0755"
+  when: "reverseproxy_webroot is not none"
+
+- name: Add webroot files
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ reverseproxy_webroot }}/{{ item }}"
+    owner: www-data
+    group: www-data
+    mode: "0644"
+  loop: "{{ reverseproxy_webroot_files }}"
+  when: "reverseproxy_webroot is not none"
+
+- name: Render Keycloak site config
+  ansible.builtin.template:
+    src: "etc/httpd/conf.d/{{ reverseproxy_template }}"
+    dest: /etc/apache2/sites-available/keycloak.conf
+    owner: www-data
+    group: www-data
+    mode: "0644"
+  notify: Restart Apache2
+
+- name: Enable Keycloak site config
+  ansible.builtin.file:
+    src: ../sites-available/keycloak.conf
+    dest: /etc/apache2/sites-enabled/keycloak.conf
+    state: link
+  notify: Restart Apache2
+
+- name: Deploy liveness and readiness probes
+  ansible.builtin.template:
+    src: "var/www/cgi-bin/{{ item }}.j2"
+    dest: "/usr/lib/cgi-bin/{{ item }}"
+    owner: root
+    group: root
+    mode: "0755"
+  loop:
+    - liveness
+    - readiness
+
+- name: Start and enable Apache2
+  ansible.builtin.service:
+    name: "{{ reverseproxy_service_name }}"
+    state: started
+    enabled: true

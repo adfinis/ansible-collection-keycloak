@@ -5,7 +5,7 @@
 namespace: adfinis
 
 # The name of the collection. Has the same character restrictions as 'namespace'
-name: TEMPLATE
+name: keycloak
 
 # The version of the collection. Must be compatible with semantic versioning
 # IMPORTANT: The version here is automatically replaced by the CI pipeline when creating a new tag.
@@ -21,7 +21,7 @@ authors:
 
 ### OPTIONAL but strongly recommended
 # A short summary description of the collection
-description: This should serve as a TEMPLATE to create new collections
+description: Install and configure Keycloak Quarkus as single node or HA cluster
 
 # Either a single license or a list of licenses for content inside of a collection. Ansible Galaxy currently only
 # accepts L(SPDX,https://spdx.org/licenses/) licenses. This key is mutually exclusive with 'license_file'
@@ -37,19 +37,21 @@ tags:
 # collection label 'namespace.name'. The value is a version range
 # L(specifiers,https://python-semanticversion.readthedocs.io/en/latest/#requirement-specification). Multiple version
 # range specifiers can be set and are separated by ','
-dependencies: {}
+dependencies:
+  ansible.posix: ">=1.5.4"
+  community.general: ">=8.4.0"
 
 # The URL of the originating SCM repository
-repository: https://github.com/adfinis/ansible-collection-TEMPLATE
+repository: https://github.com/adfinis/ansible-collection-keycloak
 
 # The URL to any online docs
-documentation: https://github.com/adfinis/ansible-collection-TEMPLATE
+documentation: https://github.com/adfinis/ansible-collection-keycloak
 
 # The URL to the homepage of the collection/project
 homepage: https://adfinis.com
 
 # The URL to the collection issue tracker
-issues: https://github.com/adfinis/ansible-collection-TEMPLATE/issues
+issues: https://github.com/adfinis/ansible-collection-keycloak/issues
 
 # A list of file glob-like patterns used to filter any files or directories that should not be included in the build
 # artifact. A pattern is matched from the relative path of the file or directory of the collection directory. This

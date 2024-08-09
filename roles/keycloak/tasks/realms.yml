@@ -1,0 +1,36 @@
+---
+
+# Realm configuration using https://github.com/adorsys/keycloak-config-cli
+
+- name: Render JSON realm config files to be loaded
+  ansible.builtin.copy:
+    src: "opt/keycloak/config/{{ item }}"
+    dest: "/opt/keycloak/config/{{ item }}"
+    owner: keycloak
+    group: keycloak
+    mode: "0600"
+  loop: "{{ keycloak_realm_config }}"
+  register: configs
+
+- name: Initialize Keycloak realm config
+  ansible.builtin.command:
+    chdir: /opt/keycloak
+    argv:
+      - java
+      - -jar
+      - "{{ keycloak_config_cli }}"
+  environment:
+    KEYCLOAK_URL: "{{ keycloak_backend }}"
+    KEYCLOAK_AVAILABILITYCHECK_ENABLED: "false"
+    KEYCLOAK_SSLVERIFY: "false"
+    KEYCLOAK_USER: "{{ keycloak_admin_user }}"
+    KEYCLOAK_PASSWORD: "{{ keycloak_admin_password }}"
+    IMPORT_FILES_LOCATIONS: "config/*"
+  register: cli
+  changed_when: true
+  when: configs.changed  # noqa no-handler
+
+- name: Print output of config CLI invocation
+  ansible.builtin.debug:
+    var: cli.stdout_lines
+  when: configs.changed  # noqa no-handler

@@ -1,0 +1,59 @@
+{{ ansible_managed | comment }}
+
+# Performance tuning
+<IfModule http2_module>
+    ProtocolsHonorOrder On
+    Protocols h2 h2c http/1.1
+</IfModule>
+ExtendedStatus on
+
+KeepAlive On
+
+<VirtualHost *:80>
+  ServerName {{ reverseproxy_hostname }}
+
+{% if ansible_facts.os_family == "Debian" %}
+  CustomLog ${APACHE_LOG_DIR}/access.log combined
+  ErrorLog ${APACHE_LOG_DIR}/error.log
+
+{% endif %}
+  RewriteEngine on
+  RewriteRule ^/(.*) https://{{ reverseproxy_hostname }}/$1 [R=308,L]
+
+</VirtualHost>
+
+<VirtualHost *:443>
+  ServerName {{ reverseproxy_hostname }}
+
+{% if ansible_facts.os_family == "Debian" %}
+  CustomLog ${APACHE_LOG_DIR}/access.log combined
+  ErrorLog ${APACHE_LOG_DIR}/error.log
+
+{% endif %}
+  # generated 2024-03-07, Mozilla Guideline v5.7, Apache 2.4.57, OpenSSL 3.0.11, intermediate configuration, no OCSP
+  # https://ssl-config.mozilla.org/#server=apache&version=2.4.57&config=intermediate&openssl=3.0.11&ocsp=false&guideline=5.7
+  SSLEngine on
+  SSLCertificateFile {{ reverseproxy_cert_file }}
+  SSLCertificateKeyFile {{ reverseproxy_key_file }}
+  Header always set Strict-Transport-Security "max-age=63072000"
+
+  SSLProtocol             all -SSLv3 -TLSv1 -TLSv1.1
+  SSLCipherSuite          ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-CHACHA20-POLY1305
+  SSLHonorCipherOrder     off
+  SSLSessionTickets       off
+
+  ProxyAddHeaders On
+  ProxyPreserveHost On
+  RequestHeader set X-Forwarded-Proto "https"
+
+  # https://www.keycloak.org/server/reverseproxy
+  ProxyPass {{ reverseproxy_prefix }}/js/ {{ reverseproxy_backend }}/{{ reverseproxy_prefix }}/js/
+  ProxyPassReverse {{ reverseproxy_prefix }}/js/ {{ reverseproxy_backend }}/{{ reverseproxy_prefix }}/js/
+  ProxyPass {{ reverseproxy_prefix }}/realms/ {{ reverseproxy_backend }}/{{ reverseproxy_prefix }}/realms/
+  ProxyPassReverse {{ reverseproxy_prefix }}/realms/ {{ reverseproxy_backend }}/{{ reverseproxy_prefix }}/realms/
+  ProxyPass {{ reverseproxy_prefix }}/resources/ {{ reverseproxy_backend }}/{{ reverseproxy_prefix }}/resources/
+  ProxyPassReverse {{ reverseproxy_prefix }}/resources/ {{ reverseproxy_backend }}/{{ reverseproxy_prefix }}/resources/
+
+{{ reverseproxy_additional_config }}
+
+</VirtualHost>

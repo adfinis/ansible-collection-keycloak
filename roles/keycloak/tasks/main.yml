@@ -1,0 +1,30 @@
+---
+
+- name: Load version-specific variables
+  ansible.builtin.include_vars: "keycloak_{{ keycloak_major_version }}.yml"
+  tags:
+    - "always"
+
+- name: Install keycloak
+  ansible.builtin.import_tasks: install.yml
+  tags:
+    - "role::keycloak"
+    - "role::keycloak:install"
+
+- name: Configure Keycloak
+  ansible.builtin.import_tasks: config.yml
+  tags:
+    - "role::keycloak"
+    - "role::keycloak:config"
+
+- name: Initialize Keycloak
+  ansible.builtin.import_tasks: init.yml
+  tags:
+    - "never"
+    - "role::keycloak:init"
+
+- name: Configure Keycloak realms
+  ansible.builtin.import_tasks: realms.yml
+  tags:
+    - "never"
+    - "role::keycloak:realms"

@@ -1,0 +1,90 @@
+---
+
+- name: Install dependencies
+  ansible.builtin.apt:
+    name:
+      - "{{ keycloak_java_pkg_debian }}"
+      - curl
+      - jq
+  when: "ansible_facts.os_family == 'Debian'"
+
+- name: Install dependencies
+  ansible.builtin.dnf:
+    name:
+      - "{{ keycloak_java_pkg_redhat }}"
+      - tar
+      - curl
+      - jq
+  when: "ansible_facts.os_family == 'RedHat'"
+
+- name: Create keycloak group
+  ansible.builtin.group:
+    name: keycloak
+    system: true
+
+- name: Create keycloak user
+  ansible.builtin.user:
+    name: keycloak
+    group: keycloak
+    home: /opt/keycloak
+    system: true
+
+- name: Create keycloak home
+  ansible.builtin.file:
+    path: "{{ keycloak_dir }}"
+    state: directory
+    owner: keycloak
+    group: keycloak
+    mode: "0755"
+
+- name: Download and unarchive Keycloak release
+  ansible.builtin.unarchive:
+    src: "https://github.com/keycloak/keycloak/releases/download/{{ keycloak_version }}/keycloak-{{ keycloak_version }}.tar.gz"
+    remote_src: true
+    dest: "{{ keycloak_dir }}"
+    owner: keycloak
+    group: keycloak
+    extra_opts: ["--strip-components=1"]
+  when:
+    - keycloak_archive_filename is not defined
+
+- name: Upload and Unarchive local Keycloak release
+  ansible.builtin.unarchive:
+    src: "{{ keycloak_archive_filename }}"
+    dest: "{{ keycloak_dir }}"
+    owner: keycloak
+    group: keycloak
+    extra_opts: ["--strip-components=1"]
+  when:
+    - keycloak_archive_filename is defined
+
+- name: Download keycloak-config-cli release
+  ansible.builtin.get_url:
+    url: "https://github.com/adorsys/keycloak-config-cli/releases/download/{{ keycloak_config_cli_version }}/{{ keycloak_config_cli }}"
+    dest: "{{ keycloak_dir }}/{{ keycloak_config_cli }}"
+    owner: root
+    group: root
+    mode: "0644"
+  when:
+    - keycloak_config_cli_filename is not defined
+
+- name: Upload and Unarchive local Keycloak release
+  ansible.builtin.copy:
+    src: "{{ keycloak_config_cli_filename }}"
+    dest: "{{ keycloak_dir }}/{{ keycloak_config_cli }}"
+    owner: keycloak
+    group: keycloak
+    mode: "0644"
+  when:
+    - keycloak_config_cli_filename is defined
+
+- name: Create systemd unit
+  ansible.builtin.template:
+    src: etc/systemd/system/keycloak.service.j2
+    dest: /etc/systemd/system/keycloak.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - Reload systemd
+    - Restart Keycloak

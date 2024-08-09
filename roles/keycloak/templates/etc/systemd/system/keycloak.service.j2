@@ -1,0 +1,25 @@
+{{ ansible_managed | comment }}
+
+[Unit]
+Description=Keycloak
+After=syslog.target network.target
+Before=httpd.service
+
+[Service]
+User=keycloak
+Group=keycloak
+LimitNOFILE=102642
+PIDFile=/var/run/keycloak.pid
+{% if keycloak_version is ansible.builtin.version('19.0.0', '>=') %}
+ExecStart={{ keycloak_dir }}/bin/kc.sh start {% if not keycloak_systemd_auto_build %}--optimized{% endif %}
+{% else %}
+ExecStart={{ keycloak_dir }}/bin/kc.sh start {% if keycloak_systemd_auto_build %}--auto-build{% endif %}
+{% endif %}
+
+WorkingDirectory={{ keycloak_dir }}
+SuccessExitStatus=0 143
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

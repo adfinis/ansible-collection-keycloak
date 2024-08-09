@@ -1,0 +1,9 @@
+---
+# Debian specific vars
+
+#
+# Apache service
+reverseproxy_service_name: apache2.service
+
+reverseproxy_snakeoil_cert: /etc/ssl/certs/ssl-cert-snakeoil.pem
+reverseproxy_snakeoil_key: /etc/ssl/private/ssl-cert-snakeoil.key
