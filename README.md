@@ -18,11 +18,16 @@ Tags:
 - `role::keycloak:config`: Render Keycloak configuration files.
 - `role::keycloak:init`: Create the initial admin user in the `master` realm.  Relevant tasks are tagged with `never`, so this tag must be used explicitly.
 - `role::keycloak:realms`: Upload existing Keycloak realm configuration, e.g. exported from another Keycloak instance.  Relevant tasks are tagged with `never`, so this tag must be used explicitly.
-- `role::keycloak`: Everything above except `role::keycloak:init` and `role::keycloak:realms`.
+- `role::keycloak`: All of the above except `role::keycloak:init` and `role::keycloak:realms`.
 
 ### `adfinis.keycloak.reverseproxy`
 
 Install and configure a TLS-terminating reverse proxy using Apache2.
+
+Tags:
+- `role::reverseproxy:install`: Install Apache2.
+- `role::reverseproxy:config`: Configure Apache2 as a reverse-proxy for Keycloak.
+- `role::reverseproxy`: All of the above.
 
 
 ## Usage
