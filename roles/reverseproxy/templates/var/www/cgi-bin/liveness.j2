@@ -1,5 +1,5 @@
 #!/bin/sh
-{{ ansible_managed }}
+{{ ansible_managed | comment }}
 # Simple liveness test for Keycloak
 #
 # Check if Keycloak is up and return an easily parseable
@@ -12,7 +12,7 @@ echo "Content-type: text/plain"
 echo
 if curl -o /dev/null -s -w "%{http_code}\n" \
    --connect-timeout 1 --max-time 2 \
-   {{ reverseproxy_health_endpoint }} \
+   {{ reverseproxy_live_endpoint }} \
    | grep -q 200; then
   echo ack
 else

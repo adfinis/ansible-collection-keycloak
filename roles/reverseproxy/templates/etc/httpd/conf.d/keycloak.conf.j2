@@ -47,12 +47,12 @@ KeepAlive On
   RequestHeader set X-Forwarded-Proto "https"
 
   # https://www.keycloak.org/server/reverseproxy
-  ProxyPass {{ reverseproxy_prefix }}/js/ {{ reverseproxy_backend }}/{{ reverseproxy_prefix }}/js/
-  ProxyPassReverse {{ reverseproxy_prefix }}/js/ {{ reverseproxy_backend }}/{{ reverseproxy_prefix }}/js/
-  ProxyPass {{ reverseproxy_prefix }}/realms/ {{ reverseproxy_backend }}/{{ reverseproxy_prefix }}/realms/
-  ProxyPassReverse {{ reverseproxy_prefix }}/realms/ {{ reverseproxy_backend }}/{{ reverseproxy_prefix }}/realms/
-  ProxyPass {{ reverseproxy_prefix }}/resources/ {{ reverseproxy_backend }}/{{ reverseproxy_prefix }}/resources/
-  ProxyPassReverse {{ reverseproxy_prefix }}/resources/ {{ reverseproxy_backend }}/{{ reverseproxy_prefix }}/resources/
+  ProxyPass {{ reverseproxy_prefix }}/js/ {{ reverseproxy_backend }}{{ reverseproxy_prefix }}/js/
+  ProxyPassReverse {{ reverseproxy_prefix }}/js/ {{ reverseproxy_backend }}{{ reverseproxy_prefix }}/js/
+  ProxyPass {{ reverseproxy_prefix }}/realms/ {{ reverseproxy_backend }}{{ reverseproxy_prefix }}/realms/
+  ProxyPassReverse {{ reverseproxy_prefix }}/realms/ {{ reverseproxy_backend }}{{ reverseproxy_prefix }}/realms/
+  ProxyPass {{ reverseproxy_prefix }}/resources/ {{ reverseproxy_backend }}{{ reverseproxy_prefix }}/resources/
+  ProxyPassReverse {{ reverseproxy_prefix }}/resources/ {{ reverseproxy_backend }}{{ reverseproxy_prefix }}/resources/
 
 {{ reverseproxy_additional_config }}
 

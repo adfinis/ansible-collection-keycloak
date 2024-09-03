@@ -26,7 +26,11 @@ reverseproxy_selinux: true
 reverseproxy_webroot: /var/www/html
 reverseproxy_webroot_files: []
 
-reverseproxy_health_endpoint: "{{ reverseproxy_backend }}{{ reverseproxy_prefix }}/health"
+# Health and metrics backend runs on another port
+reverseproxy_health_backend: http://127.0.0.1:9000
+
+reverseproxy_ready_endpoint: "{{ reverseproxy_health_backend }}{{ reverseproxy_prefix }}/health/ready"
+reverseproxy_live_endpoint: "{{ reverseproxy_health_backend }}{{ reverseproxy_prefix }}/health/live"
 
 # Additional config to put at the end of the Keycloak https vhost section
 reverseproxy_additional_config: ""
