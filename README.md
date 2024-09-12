@@ -79,6 +79,9 @@ reverseproxy_backend: "http://127.0.0.1:8080"
 reverseproxy_cert_file: /etc/ssl/certs/keycloak.example.org.pem
 reverseproxy_key_file: /etc/ssl/private/keycloak.example.org.key
 
+# Optional: To enable the Apache2 status page on http://localhost/server-status
++reverseproxy_statuspage_path: "/server-status"
+
 # This exposes the Keycloak admin interface - restrict this according to your requirements
 reverseproxy_additional_config: |
   <Location /admin>

@@ -18,8 +18,21 @@ KeepAlive On
 
 {% endif %}
   RewriteEngine on
+{% if reverseproxy_statuspage_path is defined %}
+  RewriteCond %{REQUEST_URI} !{{ reverseproxy_statuspage_path }}
+{% endif %}
   RewriteRule ^/(.*) https://{{ reverseproxy_hostname }}/$1 [R=308,L]
 
+{% if reverseproxy_statuspage_path is defined %}
+  <Location {{ reverseproxy_statuspage_path }}>
+    SetHandler server-status
+    <RequireAny>
+      Require ip 127.0.0.1
+      Require ip ::1
+    </RequireAny>
+  </Location>
+
+{% endif %}
 </VirtualHost>
 
 <VirtualHost *:443>

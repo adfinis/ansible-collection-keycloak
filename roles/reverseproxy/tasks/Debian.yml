@@ -21,6 +21,12 @@
     - cgid
   notify: Restart Apache2
 
+- name: Enable Apache status module
+  community.general.apache2_module:
+    name: status
+    state: "{{ reverseproxy_statuspage_path is defined | ternary('present', 'absent') }}"
+  notify: Restart Apache2
+
 - name: Enable Apache2 config files
   ansible.builtin.file:
     src: "../conf-available/{{ item }}"
