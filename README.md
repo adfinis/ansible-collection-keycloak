@@ -67,11 +67,6 @@ keycloak_hostname: "https://keycloak.example.org"
 keycloak_admin_user: admin
 keycloak_admin_password: changeme  # Choose your own and store securely, e.g. in ansible-vault
 
-# To achieve session persistence in a single-node setup, the persistent-user-sessions feature can be enabled.
-# This is a PREVIEW feature in Keycloak 25.
-keycloak_features:
-  - persistent-user-sessions
-
 reverseproxy_hostname: keycloak.example.org
 reverseproxy_backend: "http://127.0.0.1:8080"
 # The certificates already need to be in place
