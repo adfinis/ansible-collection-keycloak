@@ -1,6 +1,6 @@
 ---
 
-keycloak_version: "26.1.1"
+keycloak_version: "26.1.4"
 
 
 keycloak_major_version: "{{ (keycloak_version | split('.'))[0] | int }}"

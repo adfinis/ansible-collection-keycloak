@@ -2,7 +2,7 @@
 
 # Appropriate keycloak-config-cli
 keycloak_config_cli: keycloak-config-cli-26.1.0.jar
-keycloak_config_cli_version: v6.3.0
+keycloak_config_cli_version: v6.4.0
 
 # Java package to drive Keycloak, Java version depends on Keycloak version
 keycloak_java_pkg_redhat: java-17-openjdk-headless
