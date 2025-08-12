@@ -7,13 +7,13 @@
       - policycoreutils-python-utils
     state: present
   notify: Restart Apache2
-  register: apache
+  register: reverseproxy_register_apache
 
 - name: Generate self-signed SSL certificates
   ansible.builtin.service:
     name: httpd-init.service
     state: started
-  when: apache.changed  # noqa no-handler
+  when: reverseproxy_register_apache.changed  # noqa no-handler
   notify: Restart Apache2
 
 - name: Open ports 80 and 443 in firewalld

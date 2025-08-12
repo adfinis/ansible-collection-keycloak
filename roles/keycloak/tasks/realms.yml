@@ -10,7 +10,7 @@
     group: keycloak
     mode: "0600"
   loop: "{{ keycloak_realm_config }}"
-  register: configs
+  register: keycloak_register_configs
 
 - name: Initialize Keycloak realm config
   ansible.builtin.command:
@@ -26,11 +26,11 @@
     KEYCLOAK_USER: "{{ keycloak_admin_user }}"
     KEYCLOAK_PASSWORD: "{{ keycloak_admin_password }}"
     IMPORT_FILES_LOCATIONS: "config/*"
-  register: cli
+  register: keycloak_register_cli
   changed_when: true
-  when: configs.changed  # noqa no-handler
+  when: keycloak_register_configs.changed  # noqa no-handler
 
 - name: Print output of config CLI invocation
   ansible.builtin.debug:
-    var: cli.stdout_lines
-  when: configs.changed  # noqa no-handler
+    var: keycloak_register_cli.stdout_lines
+  when: keycloak_register_configs.changed  # noqa no-handler
