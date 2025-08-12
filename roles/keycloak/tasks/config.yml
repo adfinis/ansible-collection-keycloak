@@ -50,8 +50,8 @@
   ansible.builtin.uri:
     url: "{{ keycloak_liveness }}"
     remote_src: "true"
-  register: _result
+  register: keycloak_register_init_result
   when: "not ansible_check_mode"
-  until: "_result.status not in [ -1, 503 ]"
+  until: "keycloak_register_init_result.status not in [ -1, 503 ]"
   retries: 720
   delay: 5

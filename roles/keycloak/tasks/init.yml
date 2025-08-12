@@ -37,7 +37,7 @@
       ansible.builtin.uri:
         url: "{{ keycloak_liveness }}"
         remote_src: true
-      register: _result
+      register: _result  # noqa var-naming[no-role-prefix]
       when: "not ansible_check_mode"
       until: "_result.status != -1"
       retries: 720
