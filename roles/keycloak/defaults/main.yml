@@ -1,6 +1,6 @@
 ---
 
-keycloak_version: "26.5.0"
+keycloak_version: "26.7.0"
 
 
 keycloak_major_version: "{{ (keycloak_version | split('.'))[0] | int }}"
@@ -21,14 +21,15 @@ keycloak_db_pass: password
 
 #
 # Infinispan communication
+# jdbc-ping - tcp unicast clustering, autodiscovery via database
 # local - no clustering, do not use infinispan
 # udp - multicast, enables autoconfiguration, requires closed subnet
 # tcp - tcp unicast clustering, but uses udp multicast for node discovery
 # tcp-static - pure unicast, allows multiple clusters in the same subnet or cross subnet clusters, or in networks without multicast support
-keycloak_stack: local
+keycloak_stack: jdbc-ping
 
 #
-# Static list of members in a tcp based cluster
+# Static list of members in a tcp-static based cluster
 keycloak_members:
   hostname-a: 7800
   hostname-b: 7800
@@ -72,32 +73,16 @@ keycloak_https_port: 8443
 # Static prefix for all URLs. Set to /auth for backward compat with JBoss Keycloak
 keycloak_http_relative_path: /
 
-# Proxy mode:
-# - edge  for TLS-terminating proxy
-# - reencrypt  for reencrypting proxy
-# - passthrough  for TCP LBs
-# LEGACY, only used for Keycloak < 25
-keycloak_proxy: edge
-
-
 # Which set of headers Keycloak accepts from the reverse proxy:
 # - xforwarded: Accept the X-Forwarded-* headers
 # - forwarded: Accept the Forwarded header
-# Used in Keycloak >= 25
 keycloak_proxy_headers: xforwarded
-
-keycloak_hostname_strict_https: true
 
 keycloak_hostname_strict: true
 
 #
 # Proxy hostname and port
 keycloak_hostname: localhost
-
-#
-# Set keycloak_hostname_port (appended to host part of all generated URLs) if running on a nonstandard port
-# LEGACY, only used in Keycloak < 25.  Should be added to keycloak_hostname in KC >= 25
-# keycloak_hostname_port: 8443
 
 #
 # Backend for availability check and metrics

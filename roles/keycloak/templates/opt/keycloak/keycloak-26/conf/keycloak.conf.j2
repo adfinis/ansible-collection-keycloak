@@ -60,8 +60,6 @@ https-port={{ keycloak_https_port }}
 # The proxy headers that should be accepted by the server.
 proxy-headers={{ keycloak_proxy_headers }}
 
-hostname-strict-https={{ keycloak_hostname_strict_https | ternary('true', 'false') }}
-
 # Do not attach route to cookies and rely on the session affinity capabilities from reverse proxy
 #spi-sticky-session-encoder-infinispan-should-attach-route=false
 
@@ -79,6 +77,8 @@ http-relative-path={{ keycloak_http_relative_path }}
 # clustering
 {% if keycloak_stack == 'local' %}
 cache=local
+{% elif keycloak_stack == 'jdbc-ping' %}
+cache=ispn
 {% else %}
 cache=ispn
 cache-config-file=cache-ispn.xml

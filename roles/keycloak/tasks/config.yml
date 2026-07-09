@@ -8,9 +8,29 @@
     group: keycloak
     mode: "0600"
   loop:
-    - cache-ispn.xml
     - keycloak.conf
     - quarkus.properties
+  notify:
+    - Rebuild Keycloak
+    - Restart Keycloak
+
+- name: Remove ISPN cache config
+  ansible.builtin.file:
+    path: "{{ keycloak_dir }}/conf/cache-ispn.xml"
+    state: absent
+  when: "keycloak_stack in ['local', 'jdbc-ping']"
+  notify:
+    - Rebuild Keycloak
+    - Restart Keycloak
+
+- name: Render ISPN cache config
+  ansible.builtin.template:
+    src: "opt/keycloak/keycloak-{{ keycloak_major_version }}/conf/cache-ispn.xml.j2"
+    dest: "{{ keycloak_dir }}/conf/cache-ispn.xml"
+    owner: keycloak
+    group: keycloak
+    mode: "0600"
+  when: "keycloak_stack not in ['local', 'jdbc-ping']"
   notify:
     - Rebuild Keycloak
     - Restart Keycloak
