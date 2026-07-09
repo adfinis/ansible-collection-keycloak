@@ -128,13 +128,16 @@ keycloak_db_url: "jdbc:postgresql://pgsql01.example.org/keycloak"
 keycloak_db_user: keycloak
 keycloak_db_pass: changemetoo  # Choose your own and store securely, e.g. in ansible-vault
 
-# The easiest clustering method is to use an UDP multicast mechanism to discover other nodes on the same network:
-keycloak_stack: udp
+# The easiest (and default) clustering method is to discover other nodes via database entries:
+keycloak_stack: jdbc-ping
+# Mainly for backwards-compatibility reasons, the following clustering methods are also available:
+# UDP multicast mechanism to discover other nodes on the same network:
+#keycloak_stack: udp
 # If this is undesired or not possible (e.g. on a non-multicast-enabled network), you can provide a static peer list instead:
-keycloak_stack: tcp-static
-keycloak_members:  # This is a host: port mapping.
-  kc01.example.org: 7800  # Using the hostnames here requires DNS resolution to work.  IP addresses can be used as well.
-  kc02.example.org: 7800
+#keycloak_stack: tcp-static
+#keycloak_members:  # This is a host: port mapping.
+#  kc01.example.org: 7800  # Using the hostnames here requires DNS resolution to work.  IP addresses can be used as well.
+#  kc02.example.org: 7800
 
 
 reverseproxy_hostname: keycloak.example.org
