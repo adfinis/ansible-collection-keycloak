@@ -4,3 +4,7 @@ skip_list:
   - meta-runtime[unsupported-version]
   - galaxy[version-incorrect]
   - galaxy[no-changelog]
+
+  exclude_paths:
+  - .cache/  # implicit unless exclude_paths is defined in config
+  - .github/
