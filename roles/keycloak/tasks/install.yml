@@ -3,7 +3,7 @@
 - name: Install dependencies
   ansible.builtin.apt:
     name:
-      - "{{ keycloak_java_pkg_debian }}"
+      - "{{ keycloak_java_pkg | default(keycloak_java_pkg_debian) }}"
       - curl
       - jq
   when: "ansible_facts.os_family == 'Debian'"
@@ -11,7 +11,7 @@
 - name: Install dependencies
   ansible.builtin.dnf:
     name:
-      - "{{ keycloak_java_pkg_redhat }}"
+      - "{{ keycloak_java_pkg | default(keycloak_java_pkg_redhat) }}"
       - tar
       - curl
       - jq
