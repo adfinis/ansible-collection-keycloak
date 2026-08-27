@@ -19,6 +19,7 @@
     - proxy_http
     - proxy_http2
     - cgid
+    - substitute
   notify: Restart Apache2
 
 - name: Enable Apache status module
