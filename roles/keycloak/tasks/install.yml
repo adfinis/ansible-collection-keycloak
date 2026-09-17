@@ -4,6 +4,7 @@
   ansible.builtin.apt:
     name:
       - "{{ keycloak_java_pkg | default(keycloak_java_pkg_debian) }}"
+      - acl
       - curl
       - jq
   when: "ansible_facts.os_family == 'Debian'"
